@@ -2,12 +2,15 @@
 #include <stdio.h>
 
 int i = 0;
+pthread_mutex_t hogger;
 
 // Note the return type: void*
 void* incrementingThreadFunction(){
     for (int j = 0; j < 1000000; j++) {
 	// TODO: sync access to i
+    pthread_mutex_lock(&hogger);
 	i++;
+    pthread_mutex_unlock(&hogger);
     }
     return NULL;
 }
@@ -15,7 +18,9 @@ void* incrementingThreadFunction(){
 void* decrementingThreadFunction(){
     for (int j = 0; j < 1000000; j++) {
 	// TODO: sync access to i
+	pthread_mutex_lock(&hogger);
 	i--;
+    pthread_mutex_unlock(&hogger);
     }
     return NULL;
 }
@@ -29,6 +34,9 @@ int main(){
     
     pthread_join(incrementingThread, NULL);
     pthread_join(decrementingThread, NULL);
+
+
+    pthread_mutex_destroy(&hogger);
     
     printf("The magic number is: %d\n", i);
     return 0;
